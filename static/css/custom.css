@@ -1,0 +1,22 @@
+#images_container {
+	background-color: fafafa;
+	text-align: center;
+	margin: 0 auto;
+	padding: 30px 5%;
+}
+
+.grid-item {
+	display: inline-block;
+	padding: 1%;
+	width: 40%;
+	min-width: 300px;
+	max-width: 400px;
+}
+
+.grid-item img {
+	vertical-align: middle;
+	width: 100%;
+	border-radius: 4px;
+	height: 400px;
+}
+

@@ -1,0 +1,159 @@
+<html>`
+<head>
+	<title>photo chan</title>
+	<link rel="stylesheet" href="/static/css/custom.css">
+	<style>
+		.label {
+			text-align: right;
+		}
+		.left {
+			padding: 2% 0;
+			width: 40%;
+			display: inline-block;
+			text-align: center;
+		}
+		.right {
+			padding: 2% 0;
+			width: 40%;
+			display: inline-block;
+			text-align: center;
+		}
+		.right img {
+			border: 0;
+			width: 200px;
+			height: 200px;
+		}
+		.grid-item p {
+			cursor: pointer;
+		}
+		#error-label {
+			height: 20px;
+			margin: 2px;
+			padding: 0;
+			color: #FF0000;
+		}
+
+		@media (max-width: 768px) {
+			.left {
+				width: 100%
+			}
+			.right {
+				width: 100%
+			}
+		}
+	</style>
+	<script>
+		function error(errorString) {
+			errorElement = document.getElementById("error-label")
+			errorElement.innerHTML = errorString;
+		}
+		function validateForm() {
+			var form = document.forms["upload_form"];
+			var caption = form["caption"].value;
+			if (caption == null || caption == "") {
+				error("Please enter caption");
+				return false;
+			}
+			var description = form["description"].value;
+			if (description == null || description == "") {
+				error("Please enter description")
+				return false;
+			}
+
+		}
+	</script>
+	<script src="/static/js/jquery-1.12.4.js"></script>
+</head>
+<body>
+	<div class="heading">
+		<h2>photo chan</h2>
+		<h4>Submit photos</h4>
+	</div>
+	<div  class="form left">
+		<div id="error-label"></div>
+		<table>
+			<tr>
+				<td class="label"><p id="status">Please select a file:</p></td>
+				<td><input type="file" id="file-input"></td>	
+			</tr>
+		</table>
+		<form id="upload_form" action="/submit" method="POST" onsubmit="return validateForm()">
+			<table>			
+				<tr>
+					<td>
+						<input type="hidden" id="image-url" name="image-url" value="">
+					</td>
+				</tr>
+				<tr>
+					<td class="label">
+						Caption:
+					</td>
+					<td>
+						<input name="caption" type="text">
+					</td>
+				</tr>
+				<tr>
+					<td class="label">
+						Description:
+					</td>
+					<td>
+						<input name="description" type="text">
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><input type="submit" value="Upload photo"></td>
+				</tr>
+			</table>
+		</form>		
+	</div>
+	<div class="right">
+		<img id="preview" src="">
+	</div>
+	<hr>
+	<div id="images_container">
+		<div class="grid">
+			{% for image in images %}
+			<div class="grid-item">
+				<img src="{{ image.image_url }}">
+				<p>Delete</p>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+	<script type="text/javascript" src="/static/js/s3upload.js"></script>
+	<script>
+	$(document).ready(function() {
+		function deleteS3(img) {
+			return	jQuery.ajax(`/delete-image?img=${img}`, {
+						method: 'GET',
+						dataType: 'json'
+						}).done(function(data){
+							console.log(data.status_code)
+							if (data.status_code === 200) {
+								alert("Image was deleted")
+							}
+							else {
+								alert("There was a problem deleting the image")
+							}
+								
+						})			
+		}
+
+		function deleteImage(e) {
+	        var t = e.target;
+    	    while (t.nodeName !== 'DIV') { t = t.parentNode };
+    	    var src = t.getElementsByTagName('IMG')[0].src;
+    	    src = src.split('/')
+    	    src = src[src.length - 1]
+    	    console.log(t);
+    	    console.log(src);
+    	    var img = src;
+    	    deleteS3(img);
+		}
+
+		$('.grid-item p').on('click', deleteImage)
+	});
+	</script>
+</body>
+</html>
